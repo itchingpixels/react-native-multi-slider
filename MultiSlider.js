@@ -8,7 +8,6 @@ import {
   View,
   TouchableHighlight,
   Platform,
-  ViewPropTypes,
 } from 'react-native';
 
 import DefaultMarker from './DefaultMarker';
@@ -33,12 +32,12 @@ export default class MultiSlider extends React.Component {
 
     optionsArray: PropTypes.array,
 
-    containerStyle: ViewPropTypes.style,
-    trackStyle: ViewPropTypes.style,
-    selectedStyle: ViewPropTypes.style,
-    unselectedStyle: ViewPropTypes.style,
-    markerStyle: ViewPropTypes.style,
-    pressedMarkerStyle: ViewPropTypes.style,
+    containerStyle: View.propTypes.style,
+    trackStyle: View.propTypes.style,
+    selectedStyle: View.propTypes.style,
+    unselectedStyle: View.propTypes.style,
+    markerStyle: View.propTypes.style,
+    pressedMarkerStyle: View.propTypes.style,
   };
 
   static defaultProps = {
@@ -72,11 +71,8 @@ export default class MultiSlider extends React.Component {
     this.state = {
       pressedOne: true,
       valueOne: this.props.values[0],
-      valueTwo: this.props.values[1],
       pastOne: initialValues[0],
-      pastTwo: initialValues[1],
       positionOne: initialValues[0],
-      positionTwo: initialValues[1],
     };
   }
 
@@ -101,15 +97,10 @@ export default class MultiSlider extends React.Component {
       this.moveOne,
       this.endOne,
     );
-    this._panResponderTwo = customPanResponder(
-      this.startTwo,
-      this.moveTwo,
-      this.endTwo,
-    );
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.state.onePressed || this.state.twoPressed) return;
+    if (this.state.onePressed) return;
 
     let position, nextState = {};
     if (
@@ -125,20 +116,6 @@ export default class MultiSlider extends React.Component {
       nextState.pastOne = position;
       nextState.positionOne = position;
     }
-    if (
-      nextProps.values[1] !== this.state.valueTwo ||
-      (nextProps.sliderLength !== this.props.sliderLength &&
-        nextProps.values[1])
-    ) {
-      position = valueToPosition(
-        nextProps.values[1],
-        this.optionsArray,
-        nextProps.sliderLength,
-      );
-      nextState.valueTwo = nextProps.values[1];
-      nextState.pastTwo = position;
-      nextState.positionTwo = position;
-    }
 
     if (nextState != {}) {
       this.setState(nextState);
@@ -152,17 +129,10 @@ export default class MultiSlider extends React.Component {
     });
   };
 
-  startTwo = () => {
-    this.props.onValuesChangeStart();
-    this.setState({
-      twoPressed: !this.state.twoPressed,
-    });
-  };
-
   moveOne = gestureState => {
     var unconfined = gestureState.dx + this.state.pastOne;
     var bottom = 0;
-    var trueTop = this.state.positionTwo - this.stepLength;
+    var trueTop = - this.stepLength;
     var top = trueTop === 0 ? 0 : trueTop || this.props.sliderLength;
     var confined = unconfined < bottom
       ? bottom
@@ -188,41 +158,7 @@ export default class MultiSlider extends React.Component {
         },
         () => {
           var change = [this.state.valueOne];
-          if (this.state.valueTwo) {
-            change.push(this.state.valueTwo);
-          }
           this.props.onValuesChange(change);
-        },
-      );
-    }
-  };
-
-  moveTwo = gestureState => {
-    var unconfined = gestureState.dx + this.state.pastTwo;
-    var bottom = this.state.positionOne + this.stepLength;
-    var top = this.props.sliderLength;
-    var confined = unconfined < bottom
-      ? bottom
-      : unconfined > top ? top : unconfined;
-    var value = positionToValue(
-      this.state.positionTwo,
-      this.optionsArray,
-      this.props.sliderLength,
-    );
-    var slipDisplacement = this.props.touchDimensions.slipDisplacement;
-
-    if (Math.abs(gestureState.dy) < slipDisplacement || !slipDisplacement) {
-      this.setState({
-        positionTwo: confined,
-      });
-    }
-    if (value !== this.state.valueTwo) {
-      this.setState(
-        {
-          valueTwo: value,
-        },
-        () => {
-          this.props.onValuesChange([this.state.valueOne, this.state.valueTwo]);
         },
       );
     }
@@ -236,44 +172,19 @@ export default class MultiSlider extends React.Component {
       },
       () => {
         var change = [this.state.valueOne];
-        if (this.state.valueTwo) {
-          change.push(this.state.valueTwo);
-        }
         this.props.onValuesChangeFinish(change);
       },
     );
   };
 
-  endTwo = gestureState => {
-    this.setState(
-      {
-        twoPressed: !this.state.twoPressed,
-        pastTwo: this.state.positionTwo,
-      },
-      () => {
-        this.props.onValuesChangeFinish([
-          this.state.valueOne,
-          this.state.valueTwo,
-        ]);
-      },
-    );
-  };
-
   render() {
-    const { positionOne, positionTwo } = this.state;
+    const { positionOne } = this.state;
     const { selectedStyle, unselectedStyle, sliderLength } = this.props;
-    const twoMarkers = positionTwo;
 
     const trackOneLength = positionOne;
-    const trackOneStyle = twoMarkers
-      ? unselectedStyle
-      : selectedStyle || styles.selectedTrack;
-    const trackThreeLength = twoMarkers ? sliderLength - positionTwo : 0;
+    const trackOneStyle = selectedStyle || styles.selectedTrack;
+    const trackThreeLength = 0;
     const trackThreeStyle = unselectedStyle;
-    const trackTwoLength = sliderLength - trackOneLength - trackThreeLength;
-    const trackTwoStyle = twoMarkers
-      ? selectedStyle || styles.selectedTrack
-      : unselectedStyle;
     const Marker = this.props.customMarker;
     const {
       slipDisplacement,
@@ -287,8 +198,6 @@ export default class MultiSlider extends React.Component {
 
     const markerContainerOne = { top: -24, left: trackOneLength - 24 };
 
-    const markerContainerTwo = { top: -24, right: trackThreeLength - 24 };
-
     return (
       <View style={[styles.container, this.props.containerStyle]}>
         <View style={[styles.fullTrack, { width: sliderLength }]}>
@@ -300,23 +209,6 @@ export default class MultiSlider extends React.Component {
               { width: trackOneLength },
             ]}
           />
-          <View
-            style={[
-              styles.track,
-              this.props.trackStyle,
-              trackTwoStyle,
-              { width: trackTwoLength },
-            ]}
-          />
-          {twoMarkers &&
-            <View
-              style={[
-                styles.track,
-                this.props.trackStyle,
-                trackThreeStyle,
-                { width: trackThreeLength },
-              ]}
-            />}
           <View
             style={[
               styles.markerContainer,
@@ -337,22 +229,6 @@ export default class MultiSlider extends React.Component {
               />
             </View>
           </View>
-          {twoMarkers &&
-            positionOne !== this.props.sliderLength &&
-            <View style={[styles.markerContainer, markerContainerTwo]}>
-              <View
-                style={[styles.touch, touchStyle]}
-                ref={component => this._markerTwo = component}
-                {...this._panResponderTwo.panHandlers}
-              >
-                <Marker
-                  pressed={this.state.twoPressed}
-                  markerStyle={this.props.markerStyle}
-                  pressedMarkerStyle={this.props.pressedMarkerStyle}
-                  currentValue={this.state.valueTwo}
-                />
-              </View>
-            </View>}
         </View>
       </View>
     );

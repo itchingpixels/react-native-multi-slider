@@ -132,8 +132,8 @@ export default class MultiSlider extends React.Component {
   moveOne = gestureState => {
     var unconfined = gestureState.dx + this.state.pastOne;
     var bottom = 0;
-    var trueTop = - this.stepLength;
-    var top = trueTop === 0 ? 0 : trueTop || this.props.sliderLength;
+    var trueTop = 0;
+    var top = this.props.sliderLength;
     var confined = unconfined < bottom
       ? bottom
       : unconfined > top ? top : unconfined;
@@ -183,8 +183,8 @@ export default class MultiSlider extends React.Component {
 
     const trackOneLength = positionOne;
     const trackOneStyle = selectedStyle || styles.selectedTrack;
-    const trackThreeLength = 0;
-    const trackThreeStyle = unselectedStyle;
+    const trackTwoLength = sliderLength - trackOneLength;
+    const trackTwoStyle = unselectedStyle;
     const Marker = this.props.customMarker;
     const {
       slipDisplacement,
@@ -207,6 +207,14 @@ export default class MultiSlider extends React.Component {
               this.props.trackStyle,
               trackOneStyle,
               { width: trackOneLength },
+            ]}
+          />
+          <View
+            style={[
+              styles.track,
+              this.props.trackStyle,
+              trackTwoStyle,
+              { width: trackTwoLength },
             ]}
           />
           <View

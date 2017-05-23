@@ -198,7 +198,7 @@ export default class MultiSlider extends React.Component {
     const markerContainerOne = { top: -24, left: trackOneLength - 24 };
 
     return (
-      <View style={[styles.container, this.props.containerStyle]}>
+      <View style={[styles.container, this.props.containerStyle]} {...this._panResponderOne.panHandlers}>
         <View style={[styles.fullTrack, { width: sliderLength }]}>
           <View
             style={[
@@ -226,7 +226,6 @@ export default class MultiSlider extends React.Component {
             <View
               style={[styles.touch, touchStyle]}
               ref={component => this._markerOne = component}
-              {...this._panResponderOne.panHandlers}
             >
               <Marker
                 pressed={this.state.onePressed}

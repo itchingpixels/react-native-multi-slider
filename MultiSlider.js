@@ -15,7 +15,7 @@ import { createArray, valueToPosition, positionToValue } from './converters';
 
 export default class MultiSlider extends React.Component {
   static propTypes = {
-    value: PropTypes.arrayOf(PropTypes.number),
+    value: PropTypes.number,
 
     onValuesChangeStart: PropTypes.func,
     onValuesChange: PropTypes.func,

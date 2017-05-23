@@ -15,7 +15,7 @@ import { createArray, valueToPosition, positionToValue } from './converters';
 
 export default class MultiSlider extends React.Component {
   static propTypes = {
-    values: PropTypes.arrayOf(PropTypes.number),
+    value: PropTypes.arrayOf(PropTypes.number),
 
     onValuesChangeStart: PropTypes.func,
     onValuesChange: PropTypes.func,
@@ -41,7 +41,7 @@ export default class MultiSlider extends React.Component {
   };
 
   static defaultProps = {
-    values: [0],
+    value: 0,
     onValuesChangeStart: () => {},
     onValuesChange: values => {},
     onValuesChangeFinish: values => {},
@@ -65,14 +65,13 @@ export default class MultiSlider extends React.Component {
       createArray(this.props.min, this.props.max, this.props.step);
     this.stepLength = this.props.sliderLength / this.optionsArray.length;
 
-    var initialValues = this.props.values.map(value =>
-      valueToPosition(value, this.optionsArray, this.props.sliderLength));
+    var initialValue = valueToPosition(this.props.value, this.optionsArray, this.props.sliderLength)
 
     this.state = {
       pressedOne: true,
-      valueOne: this.props.values[0],
-      pastOne: initialValues[0],
-      positionOne: initialValues[0],
+      valueOne: this.props.value,
+      pastOne: initialValue,
+      positionOne: initialValue,
     };
   }
 
@@ -104,15 +103,15 @@ export default class MultiSlider extends React.Component {
 
     let position, nextState = {};
     if (
-      nextProps.values[0] !== this.state.valueOne ||
+      nextProps.value !== this.state.valueOne ||
       nextProps.sliderLength !== this.props.sliderLength
     ) {
       position = valueToPosition(
-        nextProps.values[0],
+        nextProps.value,
         this.optionsArray,
         nextProps.sliderLength,
       );
-      nextState.valueOne = nextProps.values[0];
+      nextState.valueOne = nextProps.value;
       nextState.pastOne = position;
       nextState.positionOne = position;
     }
